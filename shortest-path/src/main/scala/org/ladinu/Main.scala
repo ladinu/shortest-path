@@ -12,7 +12,7 @@ import java.nio.charset.Charset
 import java.nio.file.{Files, Path}
 import scala.util.Try
 
-object Main extends IOApp with Serde with ShortestPath {
+object Main extends IOApp with Serde with ShortestPath with GraphUtils {
   override def run(args: List[String]): IO[ExitCode] =
     for {
 
@@ -34,7 +34,6 @@ object Main extends IOApp with Serde with ShortestPath {
                 }.flatMap(data =>
                   IO.fromEither(parse(data))
                     .flatMap(json => IO.fromEither(json.as[TrafficMeasurements]))
-                    .map(_.measurements)
                 )
               } else {
                 // Fetch from network
@@ -43,40 +42,15 @@ object Main extends IOApp with Serde with ShortestPath {
                   .use { client: Client[IO] =>
                     client
                       .expect[TrafficMeasurements](dataUri)
-                      .map(_.measurements)
                   }
               }
 
             // Construct a graph using the measurement data
-            graph = trafficMeasurements
-              .flatMap(_.measurements)
-              .groupBy(m => (m.startStreet, m.startAvenue, m.endStreet, m.endAvenue))
-              .flatMap { case ((startStreet, startAve, endStreet, endAve), measurements) =>
-                // Calculate the average
-                Try {
-                  val avgTransitTime = measurements.map(_.transitTime).sum / measurements.length
-                  Measurement(
-                    startStreet = startStreet,
-                    startAvenue = startAve,
-                    transitTime = avgTransitTime,
-                    endStreet = endStreet,
-                    endAvenue = endAve
-                  )
-                }.toOption
-              }
-              .groupBy(a => a.startStreet -> a.startAvenue)
-              .map { case ((street, ave), measurements) =>
-                Node(
-                  s"$ave$street",
-                  edges = measurements.map(m => Edge(s"${m.endAvenue}${m.endStreet}", m.transitTime)).toList
-                )
-              }
-              .toList
+            graph = toGraph(trafficMeasurements)
 
             // Find the start and end nodes in the graph
             startNodeStr = start._1 ++ start._2
             endNodeStr = end._1 ++ end._2
-
 
             (startNode, endNode) <- IO.fromOption(
               graph
