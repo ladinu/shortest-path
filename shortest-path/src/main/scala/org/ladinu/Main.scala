@@ -55,14 +55,20 @@ object Main extends IOApp with Serde with ShortestPath {
                 // Calculate the average
                 Try {
                   val avgTransitTime = measurements.map(_.transitTime).sum / measurements.length
-                  Measurement(startAve, startStreet, avgTransitTime, endAve, endStreet)
+                  Measurement(
+                    startStreet = startStreet,
+                    startAvenue = startAve,
+                    transitTime = avgTransitTime,
+                    endStreet = endStreet,
+                    endAvenue = endAve
+                  )
                 }.toOption
               }
               .groupBy(a => a.startStreet -> a.startAvenue)
               .map { case ((street, ave), measurements) =>
                 Node(
-                  s"$street$ave",
-                  edges = measurements.map(m => Edge(s"${m.endStreet}${m.endAvenue}", m.transitTime)).toList
+                  s"$ave$street",
+                  edges = measurements.map(m => Edge(s"${m.endAvenue}${m.endStreet}", m.transitTime)).toList
                 )
               }
               .toList
@@ -71,10 +77,6 @@ object Main extends IOApp with Serde with ShortestPath {
             startNodeStr = start._1 ++ start._2
             endNodeStr = end._1 ++ end._2
 
-//            _ = (start, end)
-//
-//            startNodeStr = "A26"
-//            endNodeStr = "T9"
 
             (startNode, endNode) <- IO.fromOption(
               graph
@@ -97,16 +99,6 @@ object Main extends IOApp with Serde with ShortestPath {
             _ <- IO.println(s"Segments             : ${segments.map(_.name).mkString(" -> ")}")
             _ <- IO.println(s"Total transit time   : $transitTime")
 
-            //            _ <- IO.println(
-            //              table
-            //                .values
-            //                .toList
-            //                .sortBy(_.node.name)
-            //                .map { r =>
-            //                  s"""${r.node.name} -> ${r.lowestCostFromStart} -> ${r.previousNode.map(_.name)}"""
-            //                }
-            //                .mkString("\n")
-            //            )
           } yield ExitCode.Success
 
       }

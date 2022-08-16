@@ -16,7 +16,6 @@ val commonScalacOptions =
     "UTF-8",
     "-Ypatmat-exhaust-depth",
     "off",
-    "-Wconf:msg=While parsing annotations in:silent",
     "-Yrangepos",
     "-Ywarn-dead-code",
     "-Ywarn-unused",
@@ -53,9 +52,6 @@ lazy val `shortest-path` = project
   .in(file("shortest-path"))
   .settings(commonSettings: _*)
   .settings(
-    packGenerateWindowsBatFile := false,
-    packResourceDir += (baseDirectory.value / "bin" -> "node"),
-    packResourceDir += (baseDirectory.value / "src" / "main" / "resources" -> "conf"),
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-effect" % projectDeps.CatsEffectVersion,
       "org.http4s" %% "http4s-blaze-client" % projectDeps.Http4sVersion,
@@ -70,6 +66,18 @@ lazy val `shortest-path` = project
   )
   .enablePlugins(PackPlugin)
 
+lazy val tests = project
+  .in(file("tests"))
+  .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % "3.2.12" % "test",
+      "org.scalatestplus" %% "scalacheck-1-16" % "3.2.12.0" % "test"
+    )
+  )
+  .dependsOn(`shortest-path`)
+  .aggregate(`shortest-path`)
+
 lazy val root = project
   .in(file("."))
   .settings(commonSettings: _*)
@@ -77,8 +85,10 @@ lazy val root = project
     name := "shortest-path"
   )
   .dependsOn(
-    `shortest-path`
+    `shortest-path`,
+    `tests`
   )
   .aggregate(
-    `shortest-path`
+    `shortest-path`,
+    `tests`
   )

@@ -33,7 +33,7 @@ trait ShortestPath {
 
     val nodeCount = graph.length
     val table = graph
-      .map(node => Row(node, Long.MaxValue, previousNode = None))
+      .map(node => Row(node, Double.MaxValue, previousNode = None))
       .map(row => row.node.name -> row)
       .toMap + (start.name -> Row(start, 0, previousNode = None))
 
