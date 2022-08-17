@@ -7,6 +7,13 @@ object Main extends IOApp with ShortestPath with Utils {
   override def run(args: List[String]): IO[ExitCode] =
     for {
 
+      _ <-
+        if (Runtime.version().feature() < 11) {
+          IO.println("This program require JVM 11+").*>(IO.raiseError(new Throwable("Invalid Java version")))
+        } else {
+          IO.unit
+        }
+
       command <- CLI.args.parse(args) match {
         case Left(help) =>
           IO.println(help)
