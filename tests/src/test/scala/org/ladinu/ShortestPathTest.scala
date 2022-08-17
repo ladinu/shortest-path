@@ -71,6 +71,26 @@ class ShortestPathTest extends AnyFunSuite with OptionValues with ShortestPath w
     path.map(_.name) should contain theSameElementsInOrderAs List("A", "B", "C")
   }
 
+  test("Shortest path between startNode and startNode must always be zero") {
+
+    val startNode = Node("A", List(Edge("B", 6.0), Edge("D", 1.0)))
+
+    val graph = List(
+      startNode,
+      Node("A", List(Edge("B", 6.0), Edge("D", 1.0))),
+      Node("B", List(Edge("A", 6.0), Edge("D", 2.0), Edge("C", 5.0))),
+      Node("D", List(Edge("A", 1.0), Edge("B", 2.0), Edge("E", 1.0))),
+      Node("E", List(Edge("D", 1.0), Edge("B", 2.0), Edge("C", 5.0)))
+    )
+
+    val (cost, path) = shortestPath(startNode, startNode, graph).value
+    val expected = List("A")
+
+    cost shouldBe 0
+    path.length shouldBe expected.length
+    path.map(_.name) should contain theSameElementsAs expected
+  }
+
   test("Return shortest between two nodes in the graph") {
     val startNode = Node("A", List(Edge("B", 6.0), Edge("D", 1.0)))
     val endNode = Node("C", List(Edge("B", 5.0), Edge("E", 5.0)))
@@ -85,8 +105,10 @@ class ShortestPathTest extends AnyFunSuite with OptionValues with ShortestPath w
     )
 
     val (cost, path) = shortestPath(startNode, endNode, graph).value
+    val expected = List("A", "D", "E", "C")
 
     cost shouldBe 7.0
-    path.map(_.name) should contain theSameElementsInOrderAs List("A", "D", "E", "C")
+    path.length shouldBe expected.length
+    path.map(_.name) should contain theSameElementsInOrderAs expected
   }
 }

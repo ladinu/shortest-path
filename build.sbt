@@ -46,6 +46,8 @@ lazy val projectDeps = new {
   val CirceVersion = "0.14.1"
   val CatsEffectVersion = "3.3.0"
   val DeclineVersion = "2.1.0"
+  val ScalaTestVersion = "3.2.12"
+  val ScalaTestPlusScalaCheckVersion = "3.2.12.0"
 }
 
 lazy val `shortest-path` = project
@@ -71,8 +73,8 @@ lazy val tests = project
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.2.12" % "test",
-      "org.scalatestplus" %% "scalacheck-1-16" % "3.2.12.0" % "test"
+      "org.scalatest" %% "scalatest" % projectDeps.ScalaTestVersion % "test",
+      "org.scalatestplus" %% "scalacheck-1-16" % projectDeps.ScalaTestPlusScalaCheckVersion % "test"
     )
   )
   .dependsOn(`shortest-path`)

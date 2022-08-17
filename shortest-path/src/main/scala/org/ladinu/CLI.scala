@@ -11,6 +11,7 @@ object CLI {
   sealed trait Cmd
   type Intersection = (String, String)
   final case class ShortestPath(dataUri: Uri, start: Intersection, end: Intersection) extends Cmd
+  final case class Dot(dataUri: Uri) extends Cmd
 
   val dataUri: Opts[Uri] = Opts
     .option[String](long = "data-uri", help = "file:// or https:// ")
@@ -42,7 +43,12 @@ object CLI {
       (dataUri, startOpt, endOpt).mapN(ShortestPath)
     }
 
+  val dot: Opts[Cmd] = Opts
+    .subcommand(name = "dot", help = "Output traffic data to DOT format") {
+      dataUri.map(Dot)
+    }
+
   val args: Command[Cmd] = Command(name = "app", header = "Solution by Ladinu Chandrasinghe") {
-    shortestPath
+    shortestPath.orElse(dot)
   }
 }

@@ -14,6 +14,19 @@ import scala.util.Try
 
 trait Utils extends Serde {
 
+  def toDOT(input: TrafficMeasurements): String = {
+    val body = toGraph(input)
+      .map { node =>
+        (node.name :: node.edges.map(_.to)).mkString("->")
+      }
+      .mkString(";\n")
+
+    s"""
+        digraph traffic {
+          $body
+        }
+     """.stripMargin
+  }
   def toGraph(input: TrafficMeasurements): List[Node] = {
 
     val graphMap = input
@@ -62,8 +75,8 @@ trait Utils extends Serde {
   }
 
   // Fetch & parse the measurement data
-  def getTrafficData(uri: Uri): IO[TrafficMeasurements] =
-    if (uri.scheme.map(_.value.toLowerCase).contains("file")) {
+  def getTrafficData(uri: Uri): IO[TrafficMeasurements] = {
+    val result = if (uri.scheme.map(_.value.toLowerCase).contains("file")) {
       // Fetch from disk
       IO.blocking {
         Files
@@ -81,4 +94,8 @@ trait Utils extends Serde {
             .expect[TrafficMeasurements](uri)
         }
     }
+
+    result
+      .onError(err => IO.println(s"Unable to fetch traffic measurement data: ${err.getMessage}").*>(IO.raiseError(err)))
+  }
 }
