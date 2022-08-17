@@ -35,8 +35,8 @@ object CLI {
           .toValidatedNel
       }
 
-  val startOpt: Opts[Intersection] = intersectionOpt("start", "Starting intersection. For example 1:A")
-  val endOpt: Opts[Intersection] = intersectionOpt("end", "Finishing intersection. For example 4:B")
+  val startOpt: Opts[Intersection] = intersectionOpt("start", "Starting intersection. For example A:1")
+  val endOpt: Opts[Intersection] = intersectionOpt("end", "Finishing intersection. For example B:4")
 
   val shortestPath: Opts[Cmd] = Opts
     .subcommand(name = "shortest-path", "Find the shortest path between two intersections") {
