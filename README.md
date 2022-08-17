@@ -2,8 +2,11 @@
 
 ## Usage
 
-This program has two subcommands `shortest-path` and `dot`. You can run it by executing `Main.scala`. Following are the
+You run the program in sbt shell like this ```shortest-path/run <args>```
+
+This program has two subcommands `shortest-path` and `dot`. Following are the
 usage for each subcommand. Note that this require JVM 11+
+
 
 ```text
 Usage: app shortest-path --data-uri <string> --start <string> --end <string>
